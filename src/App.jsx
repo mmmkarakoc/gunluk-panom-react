@@ -9,14 +9,33 @@ function App() {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [todos, setTodos] = useState([]);
 
+  function handleLogout() {
+    localStorage.removeItem('token');
+    setToken(null);
+    setTodos([]);
+  }
+
+  function handleUnauthorized(res) {
+    if (res.status === 401 || res.status === 403) {
+      handleLogout();
+      return true;
+    }
+    return false;
+  }
+
   useEffect(() => {
     if (!token) return;
 
     fetch('http://localhost:3000/todos', {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((res) => res.json())
-      .then((data) => setTodos(data))
+      .then((res) => {
+        if (handleUnauthorized(res)) return null;
+        return res.json();
+      })
+      .then((data) => {
+        if (data) setTodos(data);
+      })
       .catch((err) => console.error('Görevler alınamadı', err));
   }, [token]);
 
@@ -29,12 +48,15 @@ function App() {
       },
       body: JSON.stringify({ text }),
     });
+
+    if (handleUnauthorized(res)) return;
+
     const newTodo = await res.json();
     setTodos([...todos, newTodo]);
   }
 
   async function toggleTodo(id, currentDone) {
-    await fetch(`http://localhost:3000/todos/${id}`, {
+    const res = await fetch(`http://localhost:3000/todos/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -42,6 +64,8 @@ function App() {
       },
       body: JSON.stringify({ done: !currentDone }),
     });
+
+    if (handleUnauthorized(res)) return;
 
     setTodos(
       todos.map((todo) =>
@@ -51,18 +75,14 @@ function App() {
   }
 
   async function deleteTodo(id) {
-    await fetch(`http://localhost:3000/todos/${id}`, {
+    const res = await fetch(`http://localhost:3000/todos/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    setTodos(todos.filter((todo) => todo.id !== id));
-  }
+    if (handleUnauthorized(res)) return;
 
-  function handleLogout() {
-    localStorage.removeItem('token');
-    setToken(null);
-    setTodos([]);
+    setTodos(todos.filter((todo) => todo.id !== id));
   }
 
   if (!token) {
