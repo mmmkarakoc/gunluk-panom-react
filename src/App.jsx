@@ -39,14 +39,14 @@ function App() {
       .catch((err) => console.error('Görevler alınamadı', err));
   }, [token]);
 
-  async function addTodo(text) {
+  async function addTodo(text, dueDate) {
     const res = await fetch('http://localhost:3000/todos', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ text, due_date: dueDate }),
     });
 
     if (handleUnauthorized(res)) return;
