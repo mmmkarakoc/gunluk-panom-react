@@ -3,6 +3,7 @@ import TodoForm from './TodoForm';
 import TodoList from './TodoList';
 import Weather from './Weather';
 import Auth from './Auth';
+import './App.css';
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token'));
@@ -15,10 +16,7 @@ function App() {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
-      .then((data) => {
-  console.log('Backend’den gelen veri:', data);
-  setTodos(data);
-})
+      .then((data) => setTodos(data))
       .catch((err) => console.error('Görevler alınamadı', err));
   }, [token]);
 
@@ -72,12 +70,20 @@ function App() {
   }
 
   return (
-    <div>
-      <h1>Günlük Panom (React)</h1>
-      <button onClick={handleLogout}>Çıkış Yap</button>
-      <TodoForm onAdd={addTodo} />
-      <TodoList todos={todos} onToggle={toggleTodo} onDelete={deleteTodo} />
-      <Weather />
+    <div className="page">
+      <div className="topbar">
+        <h1>Günlük Panom</h1>
+        <button className="btn-ghost" onClick={handleLogout}>Çıkış Yap</button>
+      </div>
+
+      <section className="card">
+        <TodoForm onAdd={addTodo} />
+        <TodoList todos={todos} onToggle={toggleTodo} onDelete={deleteTodo} />
+      </section>
+
+      <section className="card">
+        <Weather />
+      </section>
     </div>
   );
 }

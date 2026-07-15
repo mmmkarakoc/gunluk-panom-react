@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import './App.css';
 
 function Auth({ onLogin }) {
   const [email, setEmail] = useState('');
@@ -39,32 +40,34 @@ function Auth({ onLogin }) {
   }
 
   return (
-    <div>
-      <h2>{isRegister ? 'Kayıt Ol' : 'Giriş Yap'}</h2>
+    <div className="page">
+      <div className="card auth-card">
+        <h2>{isRegister ? 'Kayıt Ol' : 'Giriş Yap'}</h2>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Şifre"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">{isRegister ? 'Kayıt Ol' : 'Giriş Yap'}</button>
-      </form>
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Şifre"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button type="submit">{isRegister ? 'Kayıt Ol' : 'Giriş Yap'}</button>
+        </form>
 
-      {message && <p>{message}</p>}
+        {message && <p className="auth-message">{message}</p>}
 
-      <button onClick={() => setIsRegister(!isRegister)}>
-        {isRegister ? 'Zaten hesabım var, giriş yap' : 'Hesabım yok, kayıt ol'}
-      </button>
+        <button className="btn-link" onClick={() => setIsRegister(!isRegister)}>
+          {isRegister ? 'Zaten hesabım var, giriş yap' : 'Hesabım yok, kayıt ol'}
+        </button>
+      </div>
     </div>
   );
 }
