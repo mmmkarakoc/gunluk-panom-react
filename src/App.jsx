@@ -6,35 +6,65 @@ import Auth from './Auth';
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token'));
-
-  const [todos, setTodos] = useState(() => {
-    const saved = localStorage.getItem('todos');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [todos, setTodos] = useState([]);
 
   useEffect(() => {
-    localStorage.setItem('todos', JSON.stringify(todos));
-  }, [todos]);
+    if (!token) return;
 
-  function addTodo(text) {
-    setTodos([...todos, { text, done: false }]);
+    fetch('http://localhost:3000/todos', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+  console.log('Backend’den gelen veri:', data);
+  setTodos(data);
+})
+      .catch((err) => console.error('Görevler alınamadı', err));
+  }, [token]);
+
+  async function addTodo(text) {
+    const res = await fetch('http://localhost:3000/todos', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ text }),
+    });
+    const newTodo = await res.json();
+    setTodos([...todos, newTodo]);
   }
 
-  function toggleTodo(index) {
+  async function toggleTodo(id, currentDone) {
+    await fetch(`http://localhost:3000/todos/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ done: !currentDone }),
+    });
+
     setTodos(
-      todos.map((todo, i) =>
-        i === index ? { ...todo, done: !todo.done } : todo
+      todos.map((todo) =>
+        todo.id === id ? { ...todo, done: currentDone ? 0 : 1 } : todo
       )
     );
   }
 
-  function deleteTodo(index) {
-    setTodos(todos.filter((_, i) => i !== index));
+  async function deleteTodo(id) {
+    await fetch(`http://localhost:3000/todos/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    setTodos(todos.filter((todo) => todo.id !== id));
   }
 
   function handleLogout() {
     localStorage.removeItem('token');
     setToken(null);
+    setTodos([]);
   }
 
   if (!token) {
